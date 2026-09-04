@@ -2,59 +2,48 @@
 
 ## Status and intent
 
-Phase 0 reserves clear ownership boundaries without implementing game systems or selecting service providers. The structure is deliberately small so design decisions can evolve without early coupling.
+Phase 1 implements the smallest local prototype that can test the cross-control mechanic. Runtime visuals are procedural placeholders, gameplay stays independent of any final scoring model, and no online or product systems are present.
 
-## Module boundaries
+## Runtime ownership
 
-| Module | Reserved responsibility | Phase 0 state |
-| --- | --- | --- |
-| `Core` | Shared game lifecycle concepts and feature-neutral contracts | Empty |
-| `Gameplay` | Cars, arena rules, round flow, and control assignment behavior | Empty |
-| `Input` | Player intent for left steering, right steering, and boost | Empty |
-| `Scoring` | Scoring rules and score state, once the model is decided | Empty |
-| `Networking` | Multiplayer transport, synchronization, sessions, and matchmaking boundaries | Empty |
-| `UI` | Presentation and player-facing screens | Empty |
-| `Monetization` | Premium-content and purchase boundaries | Empty |
-| `Tests` | Edit-mode and play-mode tests as implementation begins | Empty |
+| Type | Responsibility |
+| --- | --- |
+| `PlayerIdentity` | Stable player index, display name, owned-car color/name |
+| `LocalKeyboardInput` | The four fixed local keyboard schemes and raw intent reads |
+| `ControlAssignmentService` | Creates and validates one complete randomized player cycle |
+| `CarController` | Binds a car owner to its current driver and forwards that driver's input |
+| `CarMovement` | Auto-acceleration, steering, boost, speed cap, and lateral slide |
+| `ArenaManager` | Single arena bounds, pit regions, and owner spawn points |
+| `CarContactTracker` | Emits bump events and retains the latest car contact for shove attribution |
+| `RespawnSystem` | Emits pit/respawn events and restores cars after three seconds without elimination |
+| `GemSystem` | Maintains six gems and emits owner/driver-resolved collection events |
+| `RoundStateMachine` | Pure, testable phase transitions and timers |
+| `RoundManager` | Assignment briefing, phase orchestration, input gating, and round restart |
+| `IScoringStrategy` | Neutral six-event scoring contract plus score/feedback reads |
+| `ScoringCoordinator` | Restricts mode changes and derives per-event score deltas |
+| `CommissionScoringStrategy` | Experimental owner-heavy cooperative scoring |
+| `SiphonScoringStrategy` | Experimental driver-gain/owner-loss scoring |
+| `SplitPurseScoringStrategy` | Experimental owner gem score and attributed shove score |
+| `RoundTelemetryRecorder` | Development-only per-round JSON event ledger |
+| `PrototypeHud` | Briefing, model/rule, scores, identity state, and reveal mapping |
+| `CrossDriveGame` | Small composition root that builds the procedural prototype |
 
-Assets that belong to Crosswire live under `Assets/_Project`. Third-party content, if later approved, should remain outside this namespace so project-owned code and assets stay identifiable.
+## Dependency flow
 
-## Dependency direction
+`CrossDriveGame` composes the feature services. Input intent is read by `CarController` and applied by `CarMovement`; it does not affect assignment or scoring rules. `RoundManager` controls whether cars and gems are active and owns round progression. Gems, contact tracking, and respawn emit neutral typed events to `ScoringCoordinator`, which delegates to the current `IScoringStrategy` and returns score deltas for telemetry.
 
-Feature modules should communicate through small contracts and game state owned at the appropriate boundary. In particular:
+Commission, Siphon, and Split Purse consume the same event surface. Keys `1`/`2`/`3` select a strategy only during pre-round or results, so a live round cannot change rules underneath players. Point values and phase timings are centralized in `Phase1PrototypeConfig`.
 
-- gameplay rules must not depend directly on concrete input devices;
-- scoring must remain separate from car control and round flow;
-- networking must carry game intent/state without owning game rules;
-- UI must observe or request behavior rather than become the source of game rules; and
-- monetization must remain isolated from gameplay eligibility unless a later product decision explicitly requires otherwise.
+## Assignment and anonymity
 
-Concrete interfaces, assemblies, state ownership, network authority, transport, input package, and persistence are intentionally not selected in Phase 0.
+The assignment is represented as `driver player -> owned car`. Generation shuffles all player IDs and links consecutive IDs into one closed cycle. Validation requires exactly one target per driver, exactly one driver per car, no self-target, no mutual pair, and a traversal that visits every player before returning to the start.
 
-## Locked domain constraints
+During pre-round, assignments are shown one player at a time behind a reveal/hide handoff. The anonymous HUD renders each player's owner/control references but displays `MY DRIVER: ???`. Halftime and later phases display the inverse mapping—each owned car and its driver. The mapping is not regenerated at halftime.
 
-The architecture must be able to represent:
+## Deliberately temporary values
 
-- 3–6 players, each owning one car;
-- one randomized control-assignment cycle containing all players;
-- no self-control or mutual two-player control pair;
-- hidden driver identities in the first half and revealed identities at halftime;
-- an unchanged control mapping in the second half, based on the current locked rule;
-- auto-acceleration, left/right steering, and one boost action;
-- no elimination; and
-- one MVP arena.
+The configured comparison protocol is a 4-second pre-round countdown, 40-second anonymous phase, 4-second reveal, 35-second known phase, and 8-second results phase. Gems respawn after two seconds and cars after three seconds. These remain experimental playtest values, not final design decisions.
 
-These constraints describe required behavior only; they do not prescribe an implementation.
+## Excluded systems
 
-## Unresolved architecture inputs
-
-The following are **UNRESOLVED** and must not be encoded as permanent architecture assumptions:
-
-- final scoring model;
-- final objective/economy;
-- revenge mechanic;
-- exact round timing; and
-- premium content details.
-
-Networking technology, matchmaking design, backend authority, input package, render pipeline, and RevenueCat integration details are also not selected or implemented in Phase 0.
-
+Networking, matchmaking, accounts, persistence, progression, monetization/RevenueCat, multiple arenas, final art/audio, and final scoring are outside Phase 1.

@@ -1,0 +1,14 @@
+{
+  "name": "CrossDrive.Tests.EditMode",
+  "rootNamespace": "CrossDrive.Tests",
+  "references": [
+    "CrossDrive.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "autoReferenced": false
+}

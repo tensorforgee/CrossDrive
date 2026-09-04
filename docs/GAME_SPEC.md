@@ -52,3 +52,6 @@ The following are explicitly **UNRESOLVED**:
 
 No implementation should assume an answer to an unresolved decision without first updating this specification.
 
+## Phase 1 prototype parameters
+
+The local prototype uses four players and temporarily compares Commission, Siphon, and Split Purse exactly as documented in `PHASE1_SCORING_DESIGN.md`. It uses a 4-second countdown, 40-second anonymous phase, 4-second reveal, 35-second known phase, 8-second results phase, six two-second respawning gems, and a three-second non-eliminating car respawn. These are explicitly experimental parameters and do not resolve the MVP's final timing, objective, or scoring model.
