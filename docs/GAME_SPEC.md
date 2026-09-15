@@ -1,57 +1,72 @@
-# Crosswire Game Specification
+# CrossDrive Game Specification
 
 ## Status
 
-This document records only decisions locked for the MVP. Anything identified as unresolved is not yet part of the design contract.
+This document records locked MVP rules and explicitly marked prototype parameters. Phase 2 does not resolve the final scoring/economy decisions.
 
 ## Game identity
 
-- Title: **Crosswire**
+- Title: **CrossDrive**
 - Genre: top-down 2D multiplayer party game
-- MVP player count: 3–6 players
+- Phase 2 active player count: exactly 4
+- Long-term MVP player count remains unresolved beyond the tested four-player mode
 - MVP content: one arena
-- Each player owns one toy/bumper car.
+- Each player owns one toy/bumper car and controls a different player's car
 
-## Core control rule
+## Control assignment
 
-Each player controls another player's car rather than their own.
-
-Control assignments form one randomized cycle containing every player. As a result:
+Assignments form one randomized cycle containing every active player:
 
 - nobody controls their own car;
-- every car has exactly one controller;
-- every player controls exactly one car; and
-- no mutual two-player control pair is possible.
+- each car has exactly one driver;
+- each player controls exactly one car;
+- no mutual two-player pair is allowed; and
+- the cycle is unchanged across reveal and known play.
 
-For example, a valid four-player cycle is `A → B → C → D → A`. Separate cycles or pairs are not valid assignments.
+The Phase 2 host generates the cycle with the existing `ControlAssignmentService`. Before reveal, a client receives only their own car, the car they control, and that car's owner. Their own driver remains `???`. At reveal, the complete mapping is published to all clients at the same authoritative transition.
 
-## Round information
+## Phase 2 room and round
 
-- During the first half, the identity of the player driving each car is hidden.
-- At halftime, driver identities are revealed.
-- The control mapping currently remains unchanged during the second half.
-- There is no elimination.
+The private room flow is HOME, room-code create/join, LOBBY, then host start. All four connected players must be ready. A fifth active player cannot join. There is no account, public matchmaking, or friends system.
 
-The exact duration of each half and the full round are unresolved.
+The synchronized match sequence is:
 
-## Controls
+| State | Rule |
+| --- | --- |
+| `LOBBY` | Membership/readiness; host may start only at 4/4 ready |
+| `ASSIGNMENT` | Host creates the cycle and sends one private view per client |
+| `COUNTDOWN` | 4 seconds |
+| `ANONYMOUS` | 40 seconds; driver identities hidden |
+| `REVEAL` | 4 seconds; full unchanged mapping becomes public |
+| `KNOWN` | 35 seconds |
+| `RESULTS` | Authoritative standings; 8-second minimum before normal rematch flow |
 
-- Cars auto-accelerate.
-- Players steer left or right.
-- Players have one boost action.
+Clients do not advance state locally. Host/network timestamps are authoritative.
 
-## Unresolved decisions
+## Network gameplay rules
 
-The following are explicitly **UNRESOLVED**:
+- Clients send only steer and boost intent.
+- Host authority resolves the sender's assigned car, simulates all movement, and replicates car state.
+- Six host-owned gems score exactly once per visible generation and respawn after two seconds.
+- A car pit entry scores exactly once per car life and respawns after three seconds without elimination.
+- Recent host-observed car contact is included for Split Purse shove attribution.
+- Scores are written only by the host's existing `ScoringCoordinator` and replicated to every client.
+- Multiplayer testing defaults to Siphon. Commission and Split Purse remain development-selectable before a match.
 
-- final scoring model;
-- final objective/economy;
+## Disconnects
+
+Lobby disconnects remove the player and block start until the room returns to four ready clients. A match disconnect ends/interrupts the round safely instead of replacing the player and corrupting the cycle. Reconnect and advanced host migration are not Phase 2 requirements.
+
+## Prototype status and unresolved decisions
+
+The Phase 2 architecture is implemented independently of transport, but Photon Fusion is not installed and a real Fusion adapter/AppId still require manual setup. Real connectivity, multi-client play, prediction behavior, and Android builds are unverified.
+
+Still unresolved:
+
+- final scoring model and objective/economy;
 - revenge mechanic;
-- exact round timing; and
+- final round timing;
+- long-term supported player-count range; and
 - premium content details.
 
-No implementation should assume an answer to an unresolved decision without first updating this specification.
-
-## Phase 1 prototype parameters
-
-The local prototype uses four players and temporarily compares Commission, Siphon, and Split Purse exactly as documented in `PHASE1_SCORING_DESIGN.md`. It uses a 4-second countdown, 40-second anonymous phase, 4-second reveal, 35-second known phase, 8-second results phase, six two-second respawning gems, and a three-second non-eliminating car respawn. These are explicitly experimental parameters and do not resolve the MVP's final timing, objective, or scoring model.
+Phase 2 excludes RevenueCat, accounts/auth, cloud databases, public matchmaking, friends, cosmetics, progression, weapons, multiple arenas, production art, voice chat, analytics backends, and advanced anti-cheat.
