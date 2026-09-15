@@ -4,6 +4,12 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/_Project/Scenes/Phase1Prototype.unity
+    guid: 5ea3651aed23dd2a466ed62a499058a1
+  - enabled: 1
+    path: Assets/_Project/Scenes/Phase2Multiplayer.unity
+    guid: 749ba0614fc44e07856df3a4d75af3f2
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

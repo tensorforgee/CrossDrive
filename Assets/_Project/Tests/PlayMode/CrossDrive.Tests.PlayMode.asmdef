@@ -1,0 +1,8 @@
+{
+  "name": "CrossDrive.Tests.PlayMode",
+  "references": ["CrossDrive.Runtime", "Fusion.Unity"],
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll", "Fusion.Runtime.dll", "Fusion.Common.dll", "Fusion.Sockets.dll"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

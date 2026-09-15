@@ -1,65 +1,61 @@
-# Crosswire
+# CrossDrive
 
-Crosswire is a top-down 2D multiplayer party game being built for the RevenueCat Shipaton 2026.
+CrossDrive is a top-down 2D multiplayer party game. Each player owns one car while controlling a different player's car in a single four-player cycle.
 
-The project is currently in **Phase 1: local mechanic prototype**. It includes three explicitly experimental scoring strategies so the cross-control mechanic can be compared with four people sharing one keyboard. None is a final game rule.
+The repository contains two runnable entry scenes:
 
-## Unity setup
+- `Assets/_Project/Scenes/Phase1Prototype.unity` — the working four-player local hot-seat prototype.
+- `Assets/_Project/Scenes/Phase2Multiplayer.unity` — the Phase 2 Fusion Host Mode lobby.
 
-- Unity version: **6000.3.18f1 (Unity 6.3 LTS)**
-- Rendering: built-in 2D
-- Input: Unity's built-in keyboard input
-- Optional packages: Unity Test Framework only
+Unity version: **6000.3.23f1**.
 
-Open this repository folder directly from Unity Hub. Unity will generate local metadata and caches on first open; generated cache directories are excluded from version control.
+## Phase 2 status
 
-## Run the prototype
+Fusion **2.1.2** is imported. Milestone 1 implements room creation, joining, four stable seats, ready/unready, fixed-host start gating and room rejection through the existing `IRoomTransport`. The Phase2Multiplayer scene starts this adapter automatically. Start ends at an explicit milestone screen; gameplay networking remains future work.
 
-1. Open `Assets/_Project/Scenes/Phase1Prototype.unity`.
-2. Press Play.
-3. During the private briefing, everyone except the named player looks away. The named player presses their boost key once to reveal their assignment, memorizes it, then presses it again to hide the card and pass the laptop.
-4. In the editor or a Development Build, use `1`, `2`, or `3` during pre-round to select Commission, Siphon, or Split Purse. Scoring cannot be switched during active play.
-5. After all four briefings, a 4-second countdown leads into the 40-second anonymous phase.
-6. At the 4-second reveal, cars freeze and the complete driver mapping appears. The same mapping resumes for the 35-second known-driver phase.
-7. Results remain for 8 seconds. Press `R` to restart immediately, or select the next scoring model with `1`/`2`/`3`.
+See [Milestone 1 architecture, exact manual steps and verification](docs/PHASE2_MILESTONE1.md). The transport-neutral assignment/round/scoring foundation remains present, but is not networked in this milestone.
 
-The arena, cars, camera, and HUD are generated at runtime, so the checked-in scene intentionally contains only a marker object.
+## Android Development Build prerequisites
 
-## Controls
+Current project settings already target ARM64, Android minimum API 25, and mark the application as a game. Touch steer/boost controls are present in the Phase 2 shell.
 
-| Player | Own car | Steer left/right | Boost |
+1. Unity's Android platform player is present, but the bundled `SDK`, `NDK`, and `OpenJDK` module directories are absent. In Unity Hub, modify Unity `6000.3.23f1` and add **Android SDK & NDK Tools** and **OpenJDK** (and verify **Android Build Support** remains selected).
+2. In Unity, switch **File > Build Profiles** to Android and select `Phase2Multiplayer` as the startup scene.
+3. Set a project-owned Android package identifier in Player Settings; the repository intentionally does not invent an organization/domain identifier.
+4. Keep ARM64 enabled. Select **Development Build** (and Script Debugging only when needed).
+5. After Fusion setup, confirm `PhotonAppSettings`, internet permission, region settings, and all network prefabs/config assets are included.
+6. Build and install the same APK on four devices, then test create/join/ready/start, input ownership, reveal, scoring, disconnect, rematch, and leave.
+
+The Android toolchain is incomplete and no Android build has been run.
+
+## Phase 1 local prototype
+
+Open `Phase1Prototype.unity` and press Play. Four local players use these controls:
+
+| Player | Own car | Steer | Boost |
 | --- | --- | --- | --- |
 | Player 1 | Red | `A` / `D` | `W` |
-| Player 2 | Cyan | `Left Arrow` / `Right Arrow` | `Up Arrow` |
+| Player 2 | Cyan | arrows | `Up Arrow` |
 | Player 3 | Yellow | `J` / `L` | `I` |
 | Player 4 | Magenta | `C` / `V` | `F` |
 
-Cars auto-accelerate. Six gems respawn two seconds after collection. Driving off the platform or into any dark pit triggers a three-second respawn; players are never eliminated.
-
-## Experimental scoring modes
-
-| Key | Mode | Current test rule |
-| --- | --- | --- |
-| `1` | Commission | Gem: owner +3, driver +1. Pit: owner -2, driver -1. |
-| `2` | Siphon | Gem: driver +2, owner -1. Pit: owner -1. |
-| `3` | Split Purse | Gem: owner +3. Pit: owner -2; driver of a qualifying last-contact car +3. |
-
-Split Purse uses a one-second contact-attribution window. Bumps never score directly.
-
-Development/editor rounds write JSON telemetry to `Application.persistentDataPath/CrossDriveTelemetry`, including mapping, events, score deltas, and final scores.
+Phase 1 retains its 4/40/4/35/8-second timing, six gems, two-second gem respawn, three-second non-eliminating car respawn, telemetry, and development scoring selection (`1` Commission, `2` Siphon, `3` Split Purse).
 
 ## Tests
 
-Open **Window > General > Test Runner**, select **EditMode**, and run all tests. Tests cover cycle invariants, all documented scoring deltas, attribution edge cases, model-switch restrictions, fixed mapping, and round timing.
+Open **Window > General > Test Runner**, select **EditMode**, and run all tests. Phase 2 tests cover host assignment, private/revealed mapping, mapping preservation, exactly-once gems and pits, authoritative timestamps, four-player start gating, fifth-player rejection, disconnect handling, score snapshot consistency, and input routing.
 
-## Phase 1 boundaries
+## Known limitations
 
-Included: one arena, four local players, cross-control assignment, simple car motion, pits/respawn, gems, round phases, debug HUD, telemetry, and three pluggable experimental scoring strategies.
-
-Not included: final scoring rules, networking, RevenueCat, progression, accounts, matchmaking, multiple maps, final art, or additional gameplay systems.
+- Gameplay replication and private assignment delivery are outside Milestone 1.
+- See the Milestone 1 verification record for transport checks. Separate-device play, latency/prediction, and Android builds remain unverified.
+- In-match disconnect ends the round; reconnect and host migration are intentionally not implemented.
+- Room codes are private session names, not public matchmaking.
+- The Phase 2 scene is a functional debug shell, not production art or UX.
 
 ## Documentation
 
 - [Game specification](docs/GAME_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Phases](docs/PHASES.md)
+- [Phase 1 scoring design](docs/PHASE1_SCORING_DESIGN.md)

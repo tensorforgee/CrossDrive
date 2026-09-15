@@ -3,7 +3,7 @@
 Status: **candidate designs for playtesting. Nothing here is locked.**
 Role of this document: three falsifiable scoring models, a halftime recommendation, round timing, and a playtest protocol that produces behavioural evidence.
 
-> Naming note: this folder and brief say **CrossDrive**; `README.md` and `docs/*` say **Crosswire**. Pick one before the first build — it appears in the demo video and the Shipaton submission.
+> Naming note: the product name was standardized as **CrossDrive** for Phase 2.
 
 ---
 

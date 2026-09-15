@@ -1,4 +1,5 @@
 {
   "name": "CrossDrive.Runtime",
-  "rootNamespace": "CrossDrive"
+  "rootNamespace": "CrossDrive",
+  "references": ["Fusion.Unity", "Photon.Realtime"]
 }

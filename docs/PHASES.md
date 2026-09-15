@@ -1,38 +1,45 @@
-# Crosswire Phases
+# CrossDrive Phases
 
 ## Phase 0 — Foundation and documentation
 
 Status: **complete**
 
-Phase 0 established the Unity 6.3 LTS scaffold, project-owned folder structure, version-control exclusions, locked MVP constraints, and initial module boundaries.
+Established the Unity scaffold, project folders, version-control exclusions, MVP constraints, and initial module boundaries.
 
 ## Phase 1 — Local mechanic prototype
 
-Status: **current**
+Status: **complete**
 
-Phase 1 provides:
+Provides one procedural arena, four local keyboard schemes, a complete randomized cross-control cycle, private assignment, anonymous/reveal/known play, movement/boost, gems, pits/non-eliminating respawn, three scoring strategies, development telemetry, and EditMode domain tests.
 
-- one procedural top-down test arena with three pits and six respawning gems;
-- four distinct placeholder cars and four local keyboard schemes;
-- one complete randomized cross-control cycle;
-- private pre-round assignment, anonymous play, halftime reveal, known-driver play, and round end;
-- auto-acceleration, steering, boost, momentum, and non-eliminating respawn;
-- three experimental scoring implementations behind one replaceable scoring interface;
-- development-only JSON event and score telemetry; and
-- edit-mode tests for assignment, scoring, attribution, switching, and round transitions.
+The 4/40/4/35/8-second timings, movement tuning, colors, layout, gem placement, and respawn delay remain playtest parameters.
 
-The current 4/40/4/35/8-second phase timings, movement tuning, colors, layout, gem placement, and respawn delay are playtest values rather than locked final design.
+## Phase 2 — Four-player multiplayer foundation
 
-Phase 1 explicitly excludes networking, RevenueCat, final scoring, progression, accounts, matchmaking, multiple maps, final art, and unrequested gameplay systems.
+Status: **in progress — transport blocked on manual Photon setup**
+
+Implemented in the repository:
+
+- transport-separated room/player/match domain;
+- exactly four active player slots, ready state, host-only start, and fifth-player rejection;
+- host-generated Phase 1 control assignment and safe disconnect handling;
+- private pre-reveal assignment view and authoritative reveal publication;
+- authoritative timestamp phases (`LOBBY`, `ASSIGNMENT`, `COUNTDOWN`, `ANONYMOUS`, `REVEAL`, `KNOWN`, `RESULTS`);
+- Siphon-default authoritative scoring with exactly-once gem/pit event guards;
+- replicated-state DTOs for scores, six gems, four cars, respawns, phase, and reveal mapping;
+- sequenced steer/boost input routed to the controlled car;
+- minimal mobile/editor multiplayer UI shell and a separate Phase 2 scene; and
+- EditMode tests for multiplayer domain invariants.
+
+Still requiring manual/external setup:
+
+- Photon Fusion 2 SDK import and Fusion AppId;
+- a concrete Fusion Host Mode implementation of `IRoomTransport` plus network runner/behaviour prefabs;
+- multi-peer or four-client transport verification;
+- Android Build Support modules, package identifier, and a real Development Build.
+
+Phase 2 intentionally excludes RevenueCat, accounts/auth, cloud persistence, public matchmaking, friends, cosmetics, progression, weapons, multiple arenas, production art, voice chat, analytics services, advanced anti-cheat, reconnect, and in-match host migration.
 
 ## Later phases
 
-Later phases remain planning placeholders. Before implementing them, resolve or deliberately defer:
-
-- **UNRESOLVED:** final scoring model;
-- **UNRESOLVED:** final objective/economy;
-- **UNRESOLVED:** revenge mechanic;
-- **UNRESOLVED:** final round timing; and
-- **UNRESOLVED:** premium content details.
-
-Technology choices and acceptance criteria for later phases will be documented when those phases are approved.
+Final scoring, objective/economy, revenge mechanics, production content, and monetization remain unresolved and require explicit approval before implementation.
